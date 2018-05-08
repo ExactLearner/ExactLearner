@@ -18,9 +18,7 @@ import org.semanticweb.owlapi.model.OWLSubClassOfAxiom;
 import org.zhaowl.engine.ELEngine;
 
 public class ELOracleTest {
-
-     
-     
+ 
     private final OWLOntologyManager man = OWLManager.createOWLOntologyManager();
     private OWLOntology targetOntology = null;
     private OWLOntology hypothesisOntology = null;

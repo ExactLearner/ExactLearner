@@ -88,9 +88,33 @@ public class ELLearner {
 		 
 	}
 
+	private OWLSubClassOfAxiom saturateHypothesisLeft(OWLClassExpression expression, OWLClass cl) throws Exception {
+		 
+		this.leftTree = new ELTree(expression);
+		this.rightTree = new ELTree(cl);
+		for (int i = 0; i < leftTree.getMaxLevel(); i++) {
+			for (ELNode nod : leftTree.getNodesOnLevel(i + 1)) {
+				for (OWLClass cl1 : myEngineForH.getClassesInSignature()) {
+					if (!nod.getLabel().contains(cl1)) {
+						nod.extendLabel(cl1);
+						if (myEngineForH
+								.entailed(myEngineForH.getSubClassAxiom(leftTree.transformToClassExpression(), rightTree.transformToClassExpression()))) {
+						} else {
+							nod.remove(cl1);
+						}
+					}
+				}
+			}
+		} 
+		myExpression =  leftTree.transformToClassExpression();
+		myClass = (OWLClass) rightTree.transformToClassExpression();
+		return myEngineForT.getSubClassAxiom(myExpression,myClass);
+	}
+	
 	public OWLSubClassOfAxiom decomposeLeft(OWLClassExpression expression, OWLClass cl) throws Exception {
 		myClass = cl;
 		myExpression = expression;
+		saturateHypothesisLeft(myExpression,myClass);
 		while (decomposingLeft(myExpression)) {
         }
 		return myEngineForT.getSubClassAxiom(myExpression, myClass);
@@ -135,9 +159,35 @@ public class ELLearner {
 		return false;
 	}
 
+	private OWLSubClassOfAxiom saturateHypothesisRight(OWLClass cl, OWLClassExpression expression) throws Exception {
+		 
+		this.leftTree = new ELTree(cl);
+		this.rightTree = new ELTree(expression);
+		for (int i = 0; i < rightTree.getMaxLevel(); i++) {
+			for (ELNode nod : rightTree.getNodesOnLevel(i + 1)) {
+				for (OWLClass cl1 : myEngineForH.getClassesInSignature()) {
+					if (!nod.getLabel().contains(cl1)) {
+						nod.extendLabel(cl1);
+						if (myEngineForH
+								.entailed(myEngineForH.getSubClassAxiom(leftTree.transformToClassExpression(), rightTree.transformToClassExpression()))) {
+						} else {
+							nod.remove(cl1);
+						}
+					}
+				}
+			}
+		} 
+		myClass = (OWLClass) leftTree.transformToClassExpression();
+		myExpression = rightTree.transformToClassExpression();
+		return myEngineForT.getSubClassAxiom(myClass, myExpression);
+	}
+
+	 
+	
 	public OWLSubClassOfAxiom decomposeRight(OWLClass cl, OWLClassExpression expression) throws Exception {
 		myClass = cl;
 		myExpression = expression;
+		saturateHypothesisRight(myClass, myExpression);
 		while (decomposingRight(myClass, myExpression)) {
         }
 		return myEngineForT.getSubClassAxiom(myClass, myExpression);
