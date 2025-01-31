@@ -80,6 +80,12 @@ public class ELNode {
     public void remove(OWLClass cl) {
 		getLabel().remove(cl);
 	}
+    
+    
+	public void remove(ELEdge e) {
+		edges.add(e);
+
+	}
 	/**
 	 * Adds an entry to the node label.
 	 * @param newClass Class to add to label.

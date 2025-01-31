@@ -1,6 +1,5 @@
 package org.exactlearner.console;
 
-import com.sun.org.apache.regexp.internal.RE;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.semanticweb.elk.owlapi.ElkReasonerFactory;

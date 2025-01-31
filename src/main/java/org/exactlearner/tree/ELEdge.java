@@ -1,11 +1,15 @@
 package org.exactlearner.tree;
  
+import org.semanticweb.owlapi.model.OWLClassExpression;
 import org.semanticweb.owlapi.model.OWLProperty;
+import org.semanticweb.owlapi.model.OWLDataFactory;
+import uk.ac.manchester.cs.owl.owlapi.OWLDataFactoryImpl;
 
 public class ELEdge {
 	private final OWLProperty label;
 	private final String strLabel;
 	private final ELNode node;
+	private static final OWLDataFactory df = new OWLDataFactoryImpl();
 
 	/**
 	 * Constructs an edge given a label and an EL OWLClassExpression tree.
@@ -29,6 +33,11 @@ public class ELEdge {
 		return modStr;
 	}
 
+    public OWLClassExpression transformToDescription() {
+		OWLClassExpression child = node.transformToDescription();
+		return df.getOWLObjectSomeValuesFrom(label.asOWLObjectProperty(), child);
+	}
+    
     /**
 	 * @return The label of this edge.
 	 */

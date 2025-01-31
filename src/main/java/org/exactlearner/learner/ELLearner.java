@@ -1,6 +1,7 @@
 package org.exactlearner.learner;
 
 import java.util.Iterator;
+import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -201,7 +202,7 @@ public class ELLearner {
 		return myEngineForT.getSubClassAxiom(myClass, myExpression);
 	}
 
-	private Boolean decomposingRight(OWLClass cl, OWLClassExpression expression) throws Exception {
+	/*	private Boolean decomposingRight(OWLClass cl, OWLClassExpression expression) throws Exception {
 
 		ELTree tree = new ELTree(expression);
 		for (int i = 0; i < tree.getMaxLevel(); i++) {
@@ -273,7 +274,60 @@ public class ELLearner {
 		}
 		return false;
 	}
+*/
 
+	/**
+	 * @author marti Right Decomposition 
+	 * 
+	 * @param cl
+	 *            class name on the left of an inclusion
+	 *            
+	 * @param expression
+	 *            class expression on the right of an inclusion
+	 * 
+	 */
+    private boolean decomposingRight(OWLClass cl, OWLClassExpression expression) throws Exception {
+        int startCount = rightDecompositionCounter;
+        ELTree tree = new ELTree(expression);
+        for (int i = 0; i < tree.getMaxLevel(); i++) {
+            for (ELNode nod : tree.getNodesOnLevel(i + 1)) {
+                List<ELEdge> edges = nod.getEdges().stream().toList();
+                for (ELEdge edge : edges) { // Iterates through all the edges of the current node
+                    for (OWLClass c : nod.getLabel()) { // Iterates through all the labels of the current node
+                        if (nod.isRoot()) {
+                            // If it is the root node, the selected label should not be the same as the left concept of the axiom
+                            myMetrics.setMembCount(myMetrics.getMembCount() + 1);
+                            if (myEngineForT.entailed(myEngineForT.getOWLEquivalentClassesAxiom(cl, c))) {
+                                continue;
+                            }
+                        }
+                        OWLSubClassOfAxiom axiom = myEngineForT.getSubClassAxiom(c, edge.transformToDescription());
+                        myMetrics.setMembCount(myMetrics.getMembCount() + 1);
+
+                        // If the new axiom is not entailed from the target ontology, we don't do anything with it.
+                        if (!myEngineForT.entailed(axiom)) {
+                            continue;
+                        }
+
+                        if (myEngineForT.entailed(axiom)) {
+                            // If the axiom is entailed from the hypothesis ontology, it is removed from the node
+                            nod.remove(edge);
+                            rightDecompositionCounter++;
+                            break;
+                        } else {
+                            // If the axiom is not entailed from the hypothesis, it becomes the new counter example
+                            myExpression = axiom.getSuperClass();
+                            myClass = c;
+                            rightDecompositionCounter++;
+                            return true;
+                        }
+                    }
+                }
+            }
+        }
+        return rightDecompositionCounter > startCount;
+    }	
+	
 	/**
 	 * @author anaozaki Concept Unsaturation on the left side of the inclusion
 	 * 
